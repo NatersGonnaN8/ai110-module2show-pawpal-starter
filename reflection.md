@@ -77,13 +77,13 @@ classDiagram
 
 **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+The scheduler considers two main constraints: available time (the owner's total free minutes per day) and task priority (a 1–5 scale). Tasks are sorted by priority descending, then greedily added to the plan until the time budget is exhausted. Lower-priority tasks are dropped rather than partially scheduled.
+
+Priority won out over time-of-day as the primary sort key because a pet owner should always do the most important tasks first — if time runs out, it should be the low-priority enrichment that gets cut, not the medication.
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+The conflict detector only flags tasks with the **exact same start time** — it does not check whether task durations overlap (e.g., a 30-minute walk at 08:00 and a 10-minute feeding at 08:15 would not be flagged). This is a deliberate simplification: implementing full interval-overlap detection would require converting time strings to datetime objects, calculating end times, and comparing ranges — meaningful added complexity for an edge case most pet owners won't hit. The exact-match check catches the most obvious scheduling mistakes (two things literally booked at the same moment) with minimal code. A future iteration could add full overlap detection using `datetime.strptime` and comparing start + duration intervals.
 
 ---
 

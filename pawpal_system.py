@@ -3,10 +3,9 @@ PawPal+ — Backend logic layer
 Classes: Owner, Pet, Task, Scheduler
 """
 
-from __future__ import annotations
-
 from dataclasses import dataclass, field
-from typing import Optional
+from datetime import datetime
+from typing import List, Optional
 
 
 @dataclass
@@ -19,12 +18,15 @@ class Task:
     completed: bool = False
 
     def mark_complete(self) -> None:
-        """Mark this task as done."""
-        pass
+        """Set this task as completed."""
+        self.completed = True
 
     def is_overdue(self) -> bool:
-        """Return True if task has a scheduled time that has already passed today."""
-        pass
+        """Return True if a scheduled time exists and has already passed today."""
+        if not self.scheduled_time:
+            return False
+        now = datetime.now().strftime("%H:%M")
+        return self.scheduled_time < now
 
 
 @dataclass
@@ -33,38 +35,42 @@ class Pet:
     species: str           # e.g. "dog", "cat"
     age_years: int
     weight_kg: float
-    tasks: list[Task] = field(default_factory=list)
+    tasks: List[Task] = field(default_factory=list)
 
     def add_task(self, task: Task) -> None:
-        """Add a care task to this pet."""
-        pass
+        """Append a care task to this pet's task list."""
+        self.tasks.append(task)
 
     def remove_task(self, task_name: str) -> None:
-        """Remove a task by name."""
-        pass
+        """Remove the first task matching the given name."""
+        self.tasks = [t for t in self.tasks if t.name != task_name]
 
     def total_task_duration(self) -> int:
-        """Return the sum of all task durations in minutes."""
-        pass
+        """Return the combined duration of all tasks in minutes."""
+        return sum(t.duration_minutes for t in self.tasks)
 
 
 @dataclass
 class Owner:
     name: str
     available_minutes: int   # total free time per day
-    pets: list[Pet] = field(default_factory=list)
+    pets: List[Pet] = field(default_factory=list)
 
     def add_pet(self, pet: Pet) -> None:
         """Register a pet under this owner."""
-        pass
+        self.pets.append(pet)
 
     def remove_pet(self, pet_name: str) -> None:
-        """Remove a pet by name."""
-        pass
+        """Remove the first pet matching the given name."""
+        self.pets = [p for p in self.pets if p.name != pet_name]
 
     def total_pets(self) -> int:
-        """Return number of registered pets."""
-        pass
+        """Return the number of registered pets."""
+        return len(self.pets)
+
+    def all_tasks(self) -> List[Task]:
+        """Return every task across all pets, in pet order."""
+        return [task for pet in self.pets for task in pet.tasks]
 
 
 class Scheduler:
@@ -74,17 +80,39 @@ class Scheduler:
         self.owner = owner
         self.pet = pet
 
-    def generate_plan(self) -> list[Task]:
-        """
-        Return an ordered list of tasks that fit within the owner's available time,
-        sorted by priority (highest first). Drops lower-priority tasks if time runs out.
-        """
-        pass
+    def generate_plan(self) -> List[Task]:
+        """Sort tasks by priority (highest first) and return those that fit in available time."""
+        sorted_tasks = sorted(self.pet.tasks, key=lambda t: t.priority, reverse=True)
+        plan: List[Task] = []
+        time_used = 0
+        for task in sorted_tasks:
+            if time_used + task.duration_minutes <= self.owner.available_minutes:
+                plan.append(task)
+                time_used += task.duration_minutes
+        return plan
 
-    def explain_plan(self, plan: list[Task]) -> str:
-        """Return a plain-language summary of why tasks were included or excluded."""
-        pass
+    def explain_plan(self, plan: List[Task]) -> str:
+        """Return a plain-language summary of what was scheduled and what was left out."""
+        included = {t.name for t in plan}
+        skipped = [t for t in self.pet.tasks if t.name not in included]
+        time_used = sum(t.duration_minutes for t in plan)
 
-    def fits_in_window(self, tasks: list[Task]) -> bool:
-        """Return True if the combined duration of tasks fits within available_minutes."""
-        pass
+        lines = [
+            f"Schedule for {self.pet.name} "
+            f"({time_used}/{self.owner.available_minutes} min used):",
+            "",
+        ]
+        for task in plan:
+            lines.append(
+                f"  [priority {task.priority}] {task.name} — {task.duration_minutes} min"
+            )
+        if skipped:
+            lines.append("")
+            lines.append("Skipped (not enough time):")
+            for task in skipped:
+                lines.append(f"  {task.name} ({task.duration_minutes} min)")
+        return "\n".join(lines)
+
+    def fits_in_window(self, tasks: List[Task]) -> bool:
+        """Return True if the combined duration of the given tasks fits in available time."""
+        return sum(t.duration_minutes for t in tasks) <= self.owner.available_minutes

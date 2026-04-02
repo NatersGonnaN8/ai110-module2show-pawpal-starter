@@ -101,13 +101,17 @@ The conflict detector only flags tasks with the **exact same start time** — it
 
 **a. How you used AI**
 
-AI was used in three distinct roles throughout the project.
+Copilot was used across all six phases, with different features carrying different phases.
 
-For design, I described the app scenario and asked for a class structure. The AI produced a reasonable starting point — four classes with clear responsibilities — but the initial output was a skeleton without any real logic, which meant the design decisions (like whether `Scheduler` should own the time budget or `Owner` should) still had to be made explicitly.
+**Agent Mode** was most effective for bulk implementation work — generating all four class skeletons in Phase 1, fleshing out the full logic in Phase 2, and handling the algorithmic additions (sort, filter, recurrence, conflict detection) in Phase 4. Agent Mode works well for self-contained, bounded tasks where the output can be reviewed as a whole diff. It was less useful for design — when asked to "design the scheduler," it produced over-engineered suggestions that had to be stripped back.
 
-For implementation, the most effective prompts were specific and bounded: "implement `generate_plan()` so that tasks are sorted by priority and dropped when time runs out" produced directly usable code. Open-ended prompts like "make the scheduler smarter" produced bloated suggestions that needed heavy trimming.
+**Inline Chat** was the right tool for smaller, in-context edits: adding the `from __future__ import annotations` fix, adjusting the `explain_plan()` output format, and refining individual method signatures. The ability to highlight a specific function and ask a targeted question produced much tighter results than asking the same question in a general chat.
 
-For testing, asking "what are the edge cases for a pet with no tasks?" was more useful than asking for a test file outright — it surfaced cases I hadn't considered (empty pet, unscheduled conflict detection, idempotent completion) that became actual test functions.
+**Generate tests** (smart action) gave a starting scaffold for `tests/test_pawpal.py`, but the generated tests were too shallow — they tested that methods existed, not that they produced correct output. The useful tests (recurrence due-date math, sort ordering, conflict warning content) were written by starting from the smart action output and then asking: "What are the edge cases for a scheduler with recurring tasks?" in a dedicated testing chat session.
+
+**Separate chat sessions per phase** made a real difference. Keeping design conversation separate from implementation conversation meant the context stayed relevant — the testing session wasn't polluted with class skeleton history, and the algorithmic session started clean without carrying Phase 2 implementation noise. The tradeoff is that each session starts without memory of prior decisions, so you have to re-establish context with `#file:pawpal_system.py` at the start of each one.
+
+The overall pattern: Copilot writes fast, but without human steering it optimizes for completeness over simplicity. Every AI output in this project needed a judgment call about what to keep, cut, or reframe.
 
 **b. Judgment and verification**
 

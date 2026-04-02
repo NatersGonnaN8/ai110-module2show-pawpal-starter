@@ -12,6 +12,16 @@ A Streamlit app that helps a pet owner plan daily care tasks across multiple pet
 - **Multi-pet support** — one owner can manage multiple pets, each with their own independent task list and schedule
 - **Plain-language plan explanation** — the generated schedule shows time used, which tasks were included (with priority labels), and which were skipped and why
 
+## 📸 Demo
+
+<a href="/course_images/ai110/pawpal_screenshot.png" target="_blank"><img src='/course_images/ai110/pawpal_screenshot.png' title='PawPal App' width='' alt='PawPal App' class='center-block' /></a>
+
+Run locally with:
+
+```bash
+streamlit run app.py
+```
+
 ## Scenario
 
 A busy pet owner needs help staying consistent with pet care. They want an assistant that can:

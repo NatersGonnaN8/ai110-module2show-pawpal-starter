@@ -3,6 +3,8 @@ PawPal+ — Backend logic layer
 Classes: Owner, Pet, Task, Scheduler
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -31,7 +33,7 @@ class Pet:
     species: str           # e.g. "dog", "cat"
     age_years: int
     weight_kg: float
-    tasks: list = field(default_factory=list)
+    tasks: list[Task] = field(default_factory=list)
 
     def add_task(self, task: Task) -> None:
         """Add a care task to this pet."""
@@ -50,7 +52,7 @@ class Pet:
 class Owner:
     name: str
     available_minutes: int   # total free time per day
-    pets: list = field(default_factory=list)
+    pets: list[Pet] = field(default_factory=list)
 
     def add_pet(self, pet: Pet) -> None:
         """Register a pet under this owner."""

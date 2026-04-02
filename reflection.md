@@ -96,8 +96,11 @@ classDiagram
 
 **b. Judgment and verification**
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+When AI generated the initial class skeletons, the `Pet` and `Owner` dataclasses both used bare `list` with no type annotation for their collection fields — for example, `tasks: list = field(default_factory=list)`. That works at runtime, but it loses all type information, meaning nothing tells you (or your editor) that `tasks` should only contain `Task` objects. It's the kind of thing that causes silent bugs later when you accidentally append the wrong type.
+
+The fix was to use `list[Task]` and `list[Pet]` with proper generic annotations. But that introduced a second problem: Python dataclasses can't reference a class in its own type hint at definition time — `Pet` can't have `list[Task]` if `Task` is defined after it, or if the interpreter hasn't finished building the class yet. The solution is `from __future__ import annotations` at the top of the file, which makes Python evaluate all annotations lazily as strings instead of eagerly, resolving the forward-reference issue entirely.
+
+I verified this by checking the Python docs on PEP 563 and confirming that `from __future__ import annotations` is the standard fix for forward references in dataclasses.
 
 ---
 

@@ -73,6 +73,8 @@ classDiagram
     Task ..> Task : mark_complete returns next
 ```
 
+![UML Diagram](Screenshots/mermaid screenshot.png)
+
 **b. Design changes**
 
 Two meaningful changes happened between the initial UML and the final implementation.

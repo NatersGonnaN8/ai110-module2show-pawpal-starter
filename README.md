@@ -14,7 +14,9 @@ A Streamlit app that helps a pet owner plan daily care tasks across multiple pet
 
 ## 📸 Demo
 
-<a href="/course_images/ai110/pawpal_screenshot.png" target="_blank"><img src='/course_images/ai110/pawpal_screenshot.png' title='PawPal App' width='' alt='PawPal App' class='center-block' /></a>
+<a href="Screenshots/final app screenshot 1 of 2.png" target="_blank"><img src='Screenshots/final app screenshot 1 of 2.png' title='PawPal App' width='' alt='PawPal App' class='center-block' /></a>
+
+<a href="Screenshots/final app screenshot 2 of 2.png" target="_blank"><img src='Screenshots/final app screenshot 2 of 2.png' title='PawPal App' width='' alt='PawPal App' class='center-block' /></a>
 
 Run locally with:
 
